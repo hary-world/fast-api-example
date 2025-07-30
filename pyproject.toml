@@ -1,0 +1,25 @@
+[project]
+name = "dependency-injection"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.16.4",
+    "email-validator>=2.2.0",
+    "fastapi[standard]>=0.116.1",
+    "python-dotenv>=1.1.1",
+    "ruff>=0.12.7",
+    "scalar-fastapi>=1.2.2",
+    "sqlmodel>=0.0.24",
+    "uvicorn>=0.35.0",
+]
+
+[tool.ruff]
+line-length = 88
+select = [
+    "E",
+    "W",
+    "F",
+    "I"
+]
