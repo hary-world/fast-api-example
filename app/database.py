@@ -1,4 +1,16 @@
-from sqlmodel import Field, SQLModel
+import os
+
+from dotenv import load_dotenv
+from sqlmodel import Field, Session, SQLModel, create_engine
+
+load_dotenv(override=True)
+
+engine = create_engine(os.getenv("DATABASE_URL"))
+
+
+def get_db_session():
+    with Session(engine) as session:
+        yield session
 
 
 class Note(SQLModel, table=True):
