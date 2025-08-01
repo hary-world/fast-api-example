@@ -10,6 +10,8 @@ from app.database import Note  # noqa
 
 load_dotenv(override=True)
 
+os.makedirs("data", exist_ok=True)
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
