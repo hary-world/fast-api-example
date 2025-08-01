@@ -49,22 +49,22 @@ init-migration:
 
 # Docker commands
 docker-build:
-	docker build -t haryworld/fastpi-ext .
+	docker build -t haryarr/fastpi-ext .
 
 docker-build-dev:
-	docker build -t haryworld/fastpi-ext:dev .
+	docker build -t haryarr/fastpi-ext:dev .
 
 docker-run:
-	docker run -d -p 8000:8000 --env-file env.docker haryworld/fastpi-ext
+	docker run -d -p 8000:8000 --env-file env.docker haryarr/fastpi-ext
 
 docker-stop:
-	docker stop $$(docker ps -q --filter ancestor=haryworld/fastpi-ext)
+	docker stop $$(docker ps -q --filter ancestor=haryarr/fastpi-ext)
 
 docker-logs:
-	docker logs $$(docker ps -q --filter ancestor=haryworld/fastpi-ext)
+	docker logs $$(docker ps -q --filter ancestor=haryarr/fastpi-ext)
 
 docker-shell:
-	docker run -it haryworld/fastpi-ext /bin/bash
+	docker run -it haryarr/fastpi-ext /bin/bash
 
 docker-clean:
 	docker system prune -f
@@ -76,13 +76,47 @@ docker-dev:
 		-v $(PWD):/app \
 		-v /app/__pycache__ \
 		--env-file env.docker \
-		haryworld/fastpi-ext
+		haryarr/fastpi-ext
 
 # Docker production
 docker-prod:
 	docker run -d -p 8000:8000 \
 		--env-file env.prod \
-		haryworld/fastpi-ext
+		haryarr/fastpi-ext
+
+# Docker Hub commands
+docker-login:
+	docker login
+
+docker-build-linux:
+	docker buildx build --platform linux/amd64,linux/arm64 \
+		-t haryarr/fastpi-ext:latest \
+		-t haryarr/fastpi-ext:$(shell date +%Y%m%d) \
+		--push .
+
+docker-build-linux-amd64:
+	docker buildx build --platform linux/amd64 \
+		-t haryarr/fastpi-ext:latest \
+		-t haryarr/fastpi-ext:$(shell date +%Y%m%d) \
+		--push .
+
+docker-build-linux-arm64:
+	docker buildx build --platform linux/arm64 \
+		-t haryarr/fastpi-ext:latest \
+		-t haryarr/fastpi-ext:$(shell date +%Y%m%d) \
+		--push .
+
+docker-push:
+	docker push haryarr/fastpi-ext:latest
+
+docker-push-tag:
+	docker tag haryarr/fastpi-ext:latest haryarr/fastpi-ext:$(tag)
+	docker push haryarr/fastpi-ext:$(tag)
+
+# Setup Docker Buildx for multi-platform builds
+docker-setup-buildx:
+	docker buildx create --name multiplatform --use
+	docker buildx inspect --bootstrap
 
 # Docker compose
 docker-compose-up:
@@ -125,6 +159,17 @@ help:
 	@echo "  docker-clean  - Clean Docker system"
 	@echo "  docker-dev    - Run Docker in development mode"
 	@echo "  docker-prod   - Run Docker in production mode"
+	@echo ""
+	@echo "Docker Hub:"
+	@echo "  docker-login  - Login to Docker Hub"
+	@echo "  docker-setup-buildx - Setup multi-platform build"
+	@echo "  docker-build-linux - Build and push for Linux (amd64+arm64)"
+	@echo "  docker-build-linux-amd64 - Build and push for Linux AMD64"
+	@echo "  docker-build-linux-arm64 - Build and push for Linux ARM64"
+	@echo "  docker-push   - Push latest image to Docker Hub"
+	@echo "  docker-push-tag tag=v1.0.0 - Push tagged image to Docker Hub"
+	@echo ""
+	@echo "Docker Compose:"
 	@echo "  docker-compose-up   - Start with Docker Compose"
 	@echo "  docker-compose-down  - Stop Docker Compose"
 	@echo "  docker-compose-logs  - View Docker Compose logs"

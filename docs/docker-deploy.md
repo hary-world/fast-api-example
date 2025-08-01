@@ -6,9 +6,10 @@
 3. [Docker Build Process](#docker-build-process)
 4. [Docker Run Commands](#docker-run-commands)
 5. [Makefile Docker Commands](#makefile-docker-commands)
-6. [Database Migration in Docker](#database-migration-in-docker)
-7. [Production Deployment](#production-deployment)
-8. [Troubleshooting](#troubleshooting)
+6. [Docker Hub Deployment](#docker-hub-deployment)
+7. [Database Migration in Docker](#database-migration-in-docker)
+8. [Production Deployment](#production-deployment)
+9. [Troubleshooting](#troubleshooting)
 
 ## 🐳 Dockerfile Overview
 
@@ -111,10 +112,10 @@ PORT=8000
 #### Docker Run with Environment File
 ```bash
 # Run with development environment
-docker run -d -p 8000:8000 --env-file env.docker haryworld/fastpi-ext
+docker run -d -p 8000:8000 --env-file env.docker haryarr/fastpi-ext
 
 # Run with production environment
-docker run -d -p 8000:8000 --env-file env.prod haryworld/fastpi-ext
+docker run -d -p 8000:8000 --env-file env.prod haryarr/fastpi-ext
 ```
 
 #### Docker Compose with Environment File
@@ -122,7 +123,7 @@ docker run -d -p 8000:8000 --env-file env.prod haryworld/fastpi-ext
 # docker-compose.yml
 services:
   app:
-    image: haryworld/fastpi-ext
+    image: haryarr/fastpi-ext
     env_file:
       - env.docker
 ```
@@ -133,7 +134,7 @@ services:
 docker run -d -p 8000:8000 \
   --env-file env.docker \
   -e DATABASE_URL=sqlite:///app/custom.db \
-  haryworld/fastpi-ext
+  haryarr/fastpi-ext
 ```
 
 ## 🔨 Docker Build Process
@@ -141,25 +142,25 @@ docker run -d -p 8000:8000 \
 ### 1. Build the Docker Image
 ```bash
 # Build with default tag
-docker build -t haryworld/fastpi-ext .
+docker build -t haryarr/fastpi-ext .
 
 # Build with specific tag
-docker build -t haryworld/fastpi-ext:latest .
+docker build -t haryarr/fastpi-ext:latest .
 
 # Build with version tag
-docker build -t haryworld/fastpi-ext:v1.0.0 .
+docker build -t haryarr/fastpi-ext:v1.0.0 .
 ```
 
 ### 2. Build with Different Contexts
 ```bash
 # Build from current directory
-docker build -t haryworld/fastpi-ext .
+docker build -t haryarr/fastpi-ext .
 
 # Build with specific Dockerfile
-docker build -f Dockerfile -t haryworld/fastpi-ext .
+docker build -f Dockerfile -t haryarr/fastpi-ext .
 
 # Build with no cache (force rebuild)
-docker build --no-cache -t haryworld/fastpi-ext .
+docker build --no-cache -t haryarr/fastpi-ext .
 ```
 
 ## 🚀 Docker Run Commands
@@ -167,13 +168,13 @@ docker build --no-cache -t haryworld/fastpi-ext .
 ### 1. Basic Run
 ```bash
 # Run container in detached mode
-docker run -d -p 8000:8000 --env-file env.docker haryworld/fastpi-ext
+docker run -d -p 8000:8000 --env-file env.docker haryarr/fastpi-ext
 
 # Run with interactive terminal
-docker run -it -p 8000:8000 --env-file env.docker haryworld/fastpi-ext
+docker run -it -p 8000:8000 --env-file env.docker haryarr/fastpi-ext
 
 # Run with custom port mapping
-docker run -d -p 3000:8000 --env-file env.docker haryworld/fastpi-ext
+docker run -d -p 3000:8000 --env-file env.docker haryarr/fastpi-ext
 ```
 
 ### 2. Environment Variables Override
@@ -183,7 +184,7 @@ docker run -d -p 8000:8000 \
   --env-file env.docker \
   -e ENVIRONMENT=production \
   -e DATABASE_URL=sqlite:///app/prod.db \
-  haryworld/fastpi-ext
+  haryarr/fastpi-ext
 ```
 
 ### 3. Volume Mounting
@@ -192,13 +193,13 @@ docker run -d -p 8000:8000 \
 docker run -d -p 8000:8000 \
   -v $(pwd)/dev.db:/app/dev.db \
   --env-file env.docker \
-  haryworld/fastpi-ext
+  haryarr/fastpi-ext
 
 # Mount logs directory
 docker run -d -p 8000:8000 \
   -v $(pwd)/logs:/app/logs \
   --env-file env.docker \
-  haryworld/fastpi-ext
+  haryarr/fastpi-ext
 ```
 
 ## 🛠️ Makefile Docker Commands
@@ -207,22 +208,22 @@ docker run -d -p 8000:8000 \
 ```makefile
 # Docker commands
 docker-build:
-	docker build -t haryworld/fastpi-ext .
+	docker build -t haryarr/fastpi-ext .
 
 docker-build-dev:
-	docker build -t haryworld/fastpi-ext:dev .
+	docker build -t haryarr/fastpi-ext:dev .
 
 docker-run:
-	docker run -d -p 8000:8000 --env-file env.docker haryworld/fastpi-ext
+	docker run -d -p 8000:8000 --env-file env.docker haryarr/fastpi-ext
 
 docker-stop:
-	docker stop $$(docker ps -q --filter ancestor=haryworld/fastpi-ext)
+	docker stop $$(docker ps -q --filter ancestor=haryarr/fastpi-ext)
 
 docker-logs:
-	docker logs $$(docker ps -q --filter ancestor=haryworld/fastpi-ext)
+	docker logs $$(docker ps -q --filter ancestor=haryarr/fastpi-ext)
 
 docker-shell:
-	docker run -it haryworld/fastpi-ext /bin/bash
+	docker run -it haryarr/fastpi-ext /bin/bash
 
 docker-clean:
 	docker system prune -f
@@ -234,13 +235,47 @@ docker-dev:
 		-v $(PWD):/app \
 		-v /app/__pycache__ \
 		--env-file env.docker \
-		haryworld/fastpi-ext
+		haryarr/fastpi-ext
 
 # Docker production
 docker-prod:
 	docker run -d -p 8000:8000 \
 		--env-file env.prod \
-		haryworld/fastpi-ext
+		haryarr/fastpi-ext
+
+# Docker Hub commands
+docker-login:
+	docker login
+
+docker-build-linux:
+	docker buildx build --platform linux/amd64,linux/arm64 \
+		-t haryarr/fastpi-ext:latest \
+		-t haryarr/fastpi-ext:$(shell date +%Y%m%d) \
+		--push .
+
+docker-build-linux-amd64:
+	docker buildx build --platform linux/amd64 \
+		-t haryarr/fastpi-ext:latest \
+		-t haryarr/fastpi-ext:$(shell date +%Y%m%d) \
+		--push .
+
+docker-build-linux-arm64:
+	docker buildx build --platform linux/arm64 \
+		-t haryarr/fastpi-ext:latest \
+		-t haryarr/fastpi-ext:$(shell date +%Y%m%d) \
+		--push .
+
+docker-push:
+	docker push haryarr/fastpi-ext:latest
+
+docker-push-tag:
+	docker tag haryarr/fastpi-ext:latest haryarr/fastpi-ext:$(tag)
+	docker push haryarr/fastpi-ext:$(tag)
+
+# Setup Docker Buildx for multi-platform builds
+docker-setup-buildx:
+	docker buildx create --name multiplatform --use
+	docker buildx inspect --bootstrap
 
 # Docker compose
 docker-compose-up:
@@ -272,6 +307,142 @@ make docker-logs
 make docker-clean
 ```
 
+## 🐳 Docker Hub Deployment
+
+### 1. Prerequisites
+
+#### Docker Hub Account
+```bash
+# Create Docker Hub account at https://hub.docker.com
+# Note your username for the image tag
+```
+
+#### Docker Login
+```bash
+# Login to Docker Hub
+make docker-login
+# Enter your Docker Hub username and password
+```
+
+### 2. Multi-Platform Build Setup
+
+#### Setup Docker Buildx
+```bash
+# Setup multi-platform build capability
+make docker-setup-buildx
+
+# Verify buildx is working
+docker buildx ls
+```
+
+#### Available Platforms
+```bash
+# Linux AMD64 (Intel/AMD processors)
+make docker-build-linux-amd64
+
+# Linux ARM64 (Apple Silicon, ARM servers)
+make docker-build-linux-arm64
+
+# Both platforms (recommended)
+make docker-build-linux
+```
+
+### 3. Build and Push Commands
+
+#### Build for Linux AMD64
+```bash
+# Build and push for Linux AMD64
+make docker-build-linux-amd64
+
+# This creates:
+# - haryarr/fastpi-ext:latest (AMD64)
+# - haryarr/fastpi-ext:YYYYMMDD (AMD64)
+```
+
+#### Build for Linux ARM64
+```bash
+# Build and push for Linux ARM64
+make docker-build-linux-arm64
+
+# This creates:
+# - haryarr/fastpi-ext:latest (ARM64)
+# - haryarr/fastpi-ext:YYYYMMDD (ARM64)
+```
+
+#### Build for Multiple Platforms
+```bash
+# Build and push for both AMD64 and ARM64
+make docker-build-linux
+
+# This creates multi-platform images:
+# - haryarr/fastpi-ext:latest (AMD64 + ARM64)
+# - haryarr/fastpi-ext:YYYYMMDD (AMD64 + ARM64)
+```
+
+### 4. Manual Push Commands
+
+#### Push Latest Image
+```bash
+# Build locally first
+make docker-build
+
+# Push to Docker Hub
+make docker-push
+```
+
+#### Push Tagged Image
+```bash
+# Build locally
+make docker-build
+
+# Push with specific tag
+make docker-push-tag tag=v1.0.0
+```
+
+### 5. Pull and Run from Docker Hub
+
+#### Pull Image
+```bash
+# Pull latest image
+docker pull haryarr/fastpi-ext:latest
+
+# Pull specific version
+docker pull haryarr/fastpi-ext:v1.0.0
+```
+
+#### Run from Docker Hub
+```bash
+# Run latest image
+docker run -d -p 8000:8000 \
+  --env-file env.docker \
+  haryarr/fastpi-ext:latest
+
+# Run specific version
+docker run -d -p 8000:8000 \
+  --env-file env.prod \
+  haryarr/fastpi-ext:v1.0.0
+```
+
+### 6. Platform-Specific Commands
+
+#### Check Image Architecture
+```bash
+# Check image platform
+docker image inspect haryarr/fastpi-ext:latest | grep Architecture
+
+# List all platforms for multi-platform image
+docker manifest inspect haryarr/fastpi-ext:latest
+```
+
+#### Run on Specific Platform
+```bash
+# Force run on AMD64
+docker run --platform linux/amd64 haryarr/fastpi-ext:latest
+
+# Force run on ARM64
+docker run --platform linux/arm64 haryarr/fastpi-ext:latest
+```
+
 ## 🗄️ Database Migration in Docker
 
 ### 1. Migration Process
@@ -298,7 +469,7 @@ docker exec -it <container_id> uv run alembic current
 docker run -d -p 8000:8000 \
   -v $(pwd)/dev.db:/app/dev.db \
   --env-file env.docker \
-  haryworld/fastpi-ext
+  haryarr/fastpi-ext
 ```
 
 ## 🚀 Production Deployment
@@ -340,7 +511,7 @@ version: '3.8'
 
 services:
   app:
-    image: haryworld/fastpi-ext
+    image: haryarr/fastpi-ext
     build: .
     ports:
       - "8000:8000"
@@ -384,7 +555,7 @@ lsof -i :8000
 sudo kill -9 <PID>
 
 # Or use different port
-docker run -d -p 8001:8000 --env-file env.docker haryworld/fastpi-ext
+docker run -d -p 8001:8000 --env-file env.docker haryarr/fastpi-ext
 ```
 
 #### Permission Issues
@@ -396,7 +567,7 @@ sudo chown -R $USER:$USER .
 docker run -d -p 8000:8000 \
   -u $(id -u):$(id -g) \
   --env-file env.docker \
-  haryworld/fastpi-ext
+  haryarr/fastpi-ext
 ```
 
 #### Database Migration Failures
@@ -418,7 +589,43 @@ docker exec -it <container_id> env
 docker exec -it <container_id> cat /proc/1/environ | tr '\0' '\n'
 ```
 
-### 2. Debugging Commands
+### 2. Docker Hub Issues
+
+#### Buildx Not Available
+```bash
+# Setup buildx
+make docker-setup-buildx
+
+# Check available builders
+docker buildx ls
+
+# Create new builder if needed
+docker buildx create --name multiplatform --driver docker-container
+```
+
+#### Authentication Issues
+```bash
+# Re-login to Docker Hub
+docker logout
+make docker-login
+
+# Check login status
+docker info | grep Username
+```
+
+#### Platform Build Failures
+```bash
+# Check available platforms
+docker buildx inspect --bootstrap
+
+# Build for specific platform only
+make docker-build-linux-amd64
+
+# Check image architecture
+docker image inspect haryarr/fastpi-ext:latest | grep Architecture
+```
+
+### 3. Debugging Commands
 ```bash
 # View container logs
 docker logs <container_id>
@@ -433,7 +640,7 @@ docker stats <container_id>
 docker inspect <container_id>
 ```
 
-### 3. Cleanup Commands
+### 4. Cleanup Commands
 ```bash
 # Stop all containers
 docker stop $(docker ps -aq)
@@ -486,6 +693,22 @@ make docker-logs
 docker-compose up -d --scale app=3
 ```
 
+### 4. Docker Hub Deployment
+```bash
+# Login to Docker Hub
+make docker-login
+
+# Setup multi-platform build
+make docker-setup-buildx
+
+# Build and push for Linux
+make docker-build-linux
+
+# Pull and run from Docker Hub
+docker pull haryarr/fastpi-ext:latest
+docker run -d -p 8000:8000 --env-file env.docker haryarr/fastpi-ext:latest
+```
+
 ## ⚠️ Important Notes
 
 ### 1. **Environment File Best Practices**
@@ -494,25 +717,31 @@ docker-compose up -d --scale app=3
 - Keep environment files separate for different environments
 - Use `--env-file` flag for Docker commands
 
-### 2. **Security Considerations**
+### 2. **Docker Hub Best Practices**
+- Use semantic versioning for tags
+- Include date tags for traceability
+- Build multi-platform images for wider compatibility
+- Test images on different platforms before pushing
+
+### 3. **Security Considerations**
 - Never run containers as root in production
 - Use secrets management for sensitive data
 - Regularly update base images
 - Scan images for vulnerabilities
 
-### 3. **Performance Optimization**
+### 4. **Performance Optimization**
 - Use multi-stage builds for smaller images
 - Implement proper health checks
 - Use volume mounting for persistent data
 - Configure resource limits
 
-### 4. **Monitoring and Logging**
+### 5. **Monitoring and Logging**
 - Implement structured logging
 - Use health check endpoints
 - Monitor container resources
 - Set up log aggregation
 
-### 5. **Database Considerations**
+### 6. **Database Considerations**
 - Use persistent volumes for database files
 - Implement proper backup strategies
 - Consider using external databases for production
@@ -521,6 +750,8 @@ docker-compose up -d --scale app=3
 ## 📚 Additional Resources
 
 - [Docker Documentation](https://docs.docker.com/)
+- [Docker Hub Documentation](https://docs.docker.com/docker-hub/)
+- [Docker Buildx Documentation](https://docs.docker.com/buildx/)
 - [UV Documentation](https://docs.astral.sh/uv/)
 - [FastAPI Docker Guide](https://fastapi.tiangolo.com/deployment/docker/)
 - [Alembic Docker Guide](https://alembic.sqlalchemy.org/en/latest/cookbook.html#running-alembic-in-docker) 
